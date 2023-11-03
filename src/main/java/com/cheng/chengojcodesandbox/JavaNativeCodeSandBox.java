@@ -83,7 +83,7 @@ public class JavaNativeCodeSandBox implements CodeSandBox {
                 //先把 获得的信息 变一个List
                 executeMessageList.add(executeMessage);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                return getErrorResponse(e);
             }
         }
         //4.收集 输出结果
@@ -121,10 +121,21 @@ public class JavaNativeCodeSandBox implements CodeSandBox {
 //5.	文件清理   清理无用文件夹  判断不为空在删 不然如果删空的 会报错
         if (userCodeFile.getParentFile() != null) {
             boolean del = FileUtil.del(userCodeParentPath);
-            System.out.println("删除" + (del ? "成功" : "失败"));
+            System.out.println("删除 " + (del ? "成功" : "失败"));
         }
 
 
+        return executeCodeResponse;
+    }
+
+    //定义一个异常封装类
+    private ExecuteCodeResponse getErrorResponse(Throwable e) {
+        ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
+        executeCodeResponse.setOutputList(new ArrayList<>());
+        executeCodeResponse.setMessage(e.getMessage());
+        //代表沙箱出错
+        executeCodeResponse.setStatus(2);
+        executeCodeResponse.setJudgeInfo(new JudgeInfo());
         return executeCodeResponse;
     }
 }

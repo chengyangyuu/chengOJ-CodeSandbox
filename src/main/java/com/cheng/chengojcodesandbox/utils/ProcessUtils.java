@@ -32,7 +32,7 @@ public class ProcessUtils {
                 String compileOutput;
                 //一行一行向下码 输出信息  用Builder拼接
                 while ((compileOutput = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutput);
+                    compileOutputStringBuilder.append(compileOutput).append("\n");
                 }
                 executeMessage.setMessage(compileOutputStringBuilder.toString());
             } else {
@@ -44,7 +44,7 @@ public class ProcessUtils {
                 String compileOutput;
                 //一行一行向下码 输出信息  用Builder拼接
                 while ((compileOutput = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutput);
+                    compileOutputStringBuilder.append(compileOutput).append("\n");
                 }
                 System.out.println(compileOutputStringBuilder.toString());
 
@@ -53,7 +53,7 @@ public class ProcessUtils {
                 String errorCompileOutput;
                 //一行一行向下码 输出信息
                 while ((errorCompileOutput = errorBufferedReader.readLine()) != null) {
-                    compileErrorOutputStringBuilder.append(errorCompileOutput);
+                    compileErrorOutputStringBuilder.append(errorCompileOutput).append("\n");
                 }
                 executeMessage.setMessage(compileErrorOutputStringBuilder.toString());
                 stopWatch.stop();
@@ -88,7 +88,7 @@ public class ProcessUtils {
             String compileOutput;
             //一行一行向下码 输出信息  用Builder拼接
             while ((compileOutput = bufferedReader.readLine()) != null) {
-                compileOutputStringBuilder.append(compileOutput);
+                compileOutputStringBuilder.append(compileOutput).append("\n");
             }
             executeMessage.setMessage(compileOutputStringBuilder.toString());
             //交互进程类的程序 执行完 释放进程 否则会卡
