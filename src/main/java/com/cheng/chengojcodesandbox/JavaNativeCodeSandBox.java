@@ -24,7 +24,7 @@ public class JavaNativeCodeSandBox implements CodeSandBox {
 
     private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
 
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         JavaNativeCodeSandBox javaNativeCodeSandBox = new JavaNativeCodeSandBox();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
         //写一个测试类 测试一下 code就读取文件夹下的值
