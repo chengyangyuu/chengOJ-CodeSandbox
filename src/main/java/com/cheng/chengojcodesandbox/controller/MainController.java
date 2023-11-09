@@ -5,14 +5,12 @@ import com.cheng.chengojcodesandbox.model.ExecuteCodeRequest;
 import com.cheng.chengojcodesandbox.model.ExecuteCodeResponse;
 import io.netty.channel.unix.Unix;
 import org.apache.hc.core5.annotation.Internal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
-@RestController("/")
+@RestController
+@RequestMapping("/")
 public class MainController {
 
     @Resource
@@ -25,7 +23,7 @@ public class MainController {
     //192.168.225.128123456
 
     @PostMapping("/executeCode")
-    ExecuteCodeResponse executeCode (@RequestBody ExecuteCodeRequest executeCodeRequest){
+    public ExecuteCodeResponse executeCode (@RequestBody ExecuteCodeRequest executeCodeRequest){
         if (executeCodeRequest==null){
             throw new RuntimeException("请求参数为空");
         }

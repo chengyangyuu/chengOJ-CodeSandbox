@@ -9,6 +9,7 @@ import com.cheng.chengojcodesandbox.model.ExecuteMessage;
 import com.cheng.chengojcodesandbox.model.JudgeInfo;
 import com.cheng.chengojcodesandbox.utils.ProcessUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,11 +29,12 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
 
     private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
 
+    public static final long TIME_OUT = 10000L;
+
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         String code = executeCodeRequest.getCode();
         List<String> inputList = executeCodeRequest.getInputList();
-        String language = executeCodeRequest.getLanguage();
         //业务流程
 //        1.	需要把代码保存在一个文件(防止不同的包导致编译失败)
 //        2.	编译这段代码 得到class
@@ -95,7 +97,7 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
      * @return
      */
     public ExecuteMessage compileFile(File userCodeFile) {
-        String compileCmd = String.format("javac -encoding utf-8 %s", userCodeFile.getAbsoluteFile());
+        String compileCmd = String.format("javac -encoding utf-8 %s", userCodeFile.getAbsolutePath());
         try {
             Process compileProcess = Runtime.getRuntime().exec(compileCmd);
             ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(compileProcess, "编译");
@@ -121,10 +123,22 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
         //循环 多组 用例 塞入多组处理信息List
         for (String inputArgs : inputList) {
             String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            // todo 使用Docker时区分win和Linux的写法 win：%s;%s Linux：%s:%s
+            // String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=%s Main %s", userCodeParentPath, SECURITY_MANAGER_PATH, SECURITY_MANAGER_CLASS_NAME, inputArgs);
             try {
                 Process runProcess = Runtime.getRuntime().exec(runCmd);
+                //执行时 定义守护线程 进行超时控制 只给10s超时就摧毁
+                new Thread(()->{
+                    try {
+                        Thread.sleep(TIME_OUT);
+                        System.out.println("程序超时,运行中断");
+                        runProcess.destroy();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
                 ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
-                System.out.println(executeMessage);
+                System.out.println("程序执行信息"+executeMessage);
                 executeMessageList.add(executeMessage);
             } catch (IOException e) {
                 throw new RuntimeException("执行异常" + e);
@@ -146,18 +160,18 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
         long maxTime = 0;
         for (ExecuteMessage executeMessage : executeMessageList) {
             String errorMessage = executeMessage.getErrorMessage();
-            if (!StrUtil.isNotBlank(errorMessage)) {
+            if (StringUtils.isNotBlank(errorMessage)){
                 executeCodeResponse.setMessage(errorMessage);
                 //执行中存在错误
                 executeCodeResponse.setStatus(3);
                 break;
             }
-            //取最大值 判断超时
-            Long time = executeMessage.getTime();
-            if (time != null) {
-                maxTime = Math.max(maxTime, time);
-            }
             outputList.add(executeMessage.getMessage());
+            //取最大值 判断超时
+            Long executeTime = executeMessage.getTime();
+            if (executeTime != null) {
+                maxTime = Math.max(maxTime, executeTime);
+            }
         }
         //正常运行完成
         //没有错误 每条信息就存入了 状态设置为正常
@@ -178,8 +192,8 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
      * @return
      */
     public boolean deleteFile(File userCodeFile){
-        if (userCodeFile.getParentFile() != null) {
             String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
+        if (userCodeFile.getParentFile() != null) {
             boolean del = FileUtil.del(userCodeParentPath);
             System.out.println("删除 " + (del ? "成功" : "失败"));
             return del;
@@ -201,11 +215,5 @@ public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
         executeCodeResponse.setJudgeInfo(new JudgeInfo());
         return executeCodeResponse;
     }
-
-
-
-
-
-
 
 }
