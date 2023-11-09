@@ -18,5 +18,7 @@ public class ExecuteMessage {
 
     //执行用时
     private Long time;
+    //执行内存
+    private Long memory;
 
 }

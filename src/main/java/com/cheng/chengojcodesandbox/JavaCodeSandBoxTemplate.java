@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * java沙箱代码模板方法的实现
+ */
 @Slf4j
 public abstract class JavaCodeSandBoxTemplate implements CodeSandBox {
 
