@@ -7,6 +7,6 @@ import com.github.dockerjava.core.DockerClientConfig;
 public class DockerDemo {
     public static void main(String[] args) {
         DockerClient dockerClient = DockerClientBuilder.getInstance().build();
-        
+        //192.168.186.132   
     }
 }
